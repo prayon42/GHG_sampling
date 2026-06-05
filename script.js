@@ -158,7 +158,7 @@ function normaliseRow(row) {
     time:       getField(row, ["Time"]),
     rh:         num(getField(row, ["RH (%)", "RH", "Humidity"])),
     wind:       num(getField(row, ["Avg Wind Speed", "Wind"])),
-    lux:        num(getField(row, ["Lux"])),
+    maxWind:    num(getField(row, ["Max Wind Speed", "Max Windspeed", "Lux"])),
     airTemp:    num(getField(row, ["Air Temp (°C)", "Air Temp", "Air Temperature"])),
     ph:         num(getField(row, ["pH", "PH"])),
     do:         num(getField(row, ["DO (mg/L)", "DO", "Dissolved Oxygen"])),
@@ -201,7 +201,7 @@ function buildPopup(d) {
         ${cell("Air Temp (°C)", fmt(d.airTemp))}
         ${cell("RH (%)", fmt(d.rh))}
         ${cell("Avg Wind Speed", fmt(d.wind))}
-        ${cell("Lux", fmt(d.lux))}
+        ${cell("Max Wind Speed", fmt(d.maxWind))}
       </div>
     </div>`;
 }
