@@ -3,7 +3,9 @@
    ------------------------------------------------------------
    Markers carry TWO pieces of information at once:
      • COLOUR  = pH classification (acidic / normal / alkaline)
-     • SHAPE   = sample type  (pond=circle, lake=square, river=triangle)
+     • SHAPE   = sample type
+         pond=circle, lake=square, river=triangle,
+         reservoir=hexagon, anything else=diamond
 
    Auto-refreshes every 10 s so new Google Sheet rows appear.
    ============================================================ */
@@ -12,7 +14,7 @@
    1. CONFIGURATION  —  EDIT THESE VALUES
    ------------------------------------------------------------ */
 
-// Your published Google Sheet CSV link (kept from your file).
+// Your published Google Sheet CSV link.
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQYDiXd_9fMUQqXxx8GwDhCCWVSy-aER20gaEP7stv5l30g62MOkzs1VRaiXlVx6jkMdV6fCOg4I0_3/pub?gid=0&single=true&output=csv";
 
 // How often to re-fetch the sheet, in milliseconds (10000 = 10 seconds).
@@ -26,15 +28,15 @@ const MAP_ZOOM = 14;
    2. BUILT-IN SAMPLE DATA (fallback)
    ------------------------------------------------------------
    Used only if the live fetch fails, so the map is never blank.
-   Includes a "Sample Type" column to demo the marker shapes.
+   Mixed Sample Types below demo every marker shape.
    ------------------------------------------------------------ */
 const SAMPLE_DATA = [
-  { "Ponds_data_collection": "Rani Pokhari",   "Sample Type": "Pond",  "Latitude": 27.6721, "Longitude": 85.4151, "Time": "3:10 PM", "RH (%)": 70.1, "Avg Wind Speed": 0.7, "Lux": 1.1, "Air Temp (°C)": 26.5, "pH": 7.67, "DO (mg/L)": 7.23,  "EC (µS/cm)": 211, "Turbidity (NTU)": 101,  "Water Temp (°C)": 26.64 },
-  { "Ponds_data_collection": "Sidhha Pokhari", "Sample Type": "Lake",  "Latitude": 27.6717, "Longitude": 85.4201, "Time": "3:40 PM", "RH (%)": 63.5, "Avg Wind Speed": 0.8, "Lux": 1.4, "Air Temp (°C)": 26.6, "pH": 10.92,"DO (mg/L)": 16.45, "EC (µS/cm)": 131, "Turbidity (NTU)": 513,  "Water Temp (°C)": 27.93 },
-  { "Ponds_data_collection": "Bhajya Pokhari", "Sample Type": "Pond",  "Latitude": 27.6707, "Longitude": 85.4211, "Time": "4:15 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 1.0, "Air Temp (°C)": 27.5, "pH": 8.59, "DO (mg/L)": 9.9,   "EC (µS/cm)": 192, "Turbidity (NTU)": 57.8, "Water Temp (°C)": 27.05 },
-  { "Ponds_data_collection": "Na Pokhari",     "Sample Type": "River", "Latitude": 27.6761, "Longitude": 85.4372, "Time": "4:50 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 3.5, "Air Temp (°C)": 27.4, "pH": 10.41,"DO (mg/L)": 15.24, "EC (µS/cm)": 154, "Turbidity (NTU)": 485,  "Water Temp (°C)": 26.18 },
-  { "Ponds_data_collection": "Lamgal Pokhari", "Sample Type": "River", "Latitude": 27.6754, "Longitude": 85.4365, "Time": "5:50 PM", "RH (%)": 63.2, "Avg Wind Speed": 0.4, "Lux": 3.7, "Air Temp (°C)": 27.5, "pH": 6.41, "DO (mg/L)": 2.92,  "EC (µS/cm)": 316, "Turbidity (NTU)": 45.8, "Water Temp (°C)": 22.04 },
-  { "Ponds_data_collection": "Kamal Pokhari",  "Sample Type": "Lake",  "Latitude": 27.6768, "Longitude": 85.4384, "Time": "6:15 PM", "RH (%)": 65.4, "Avg Wind Speed": 0.4, "Lux": 0.5, "Air Temp (°C)": 22.4, "pH": 9.96, "DO (mg/L)": 12.9,  "EC (µS/cm)": 147, "Turbidity (NTU)": 285,  "Water Temp (°C)": 25.78 }
+  { "Ponds_data_collection": "Rani Pokhari",   "Sample Type": "Pond",      "Latitude": 27.6721, "Longitude": 85.4151, "Time": "3:10 PM", "RH (%)": 70.1, "Avg Wind Speed": 0.7, "Lux": 1.1, "Air Temp (°C)": 26.5, "pH": 7.67, "DO (mg/L)": 7.23,  "EC (µS/cm)": 211, "Turbidity (NTU)": 101,  "Water Temp (°C)": 26.64 },
+  { "Ponds_data_collection": "Sidhha Pokhari", "Sample Type": "Lake",      "Latitude": 27.6717, "Longitude": 85.4201, "Time": "3:40 PM", "RH (%)": 63.5, "Avg Wind Speed": 0.8, "Lux": 1.4, "Air Temp (°C)": 26.6, "pH": 10.92,"DO (mg/L)": 16.45, "EC (µS/cm)": 131, "Turbidity (NTU)": 513,  "Water Temp (°C)": 27.93 },
+  { "Ponds_data_collection": "Bhajya Pokhari", "Sample Type": "Pond",      "Latitude": 27.6707, "Longitude": 85.4211, "Time": "4:15 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 1.0, "Air Temp (°C)": 27.5, "pH": 8.59, "DO (mg/L)": 9.9,   "EC (µS/cm)": 192, "Turbidity (NTU)": 57.8, "Water Temp (°C)": 27.05 },
+  { "Ponds_data_collection": "Na Pokhari",     "Sample Type": "River",     "Latitude": 27.6761, "Longitude": 85.4372, "Time": "4:50 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 3.5, "Air Temp (°C)": 27.4, "pH": 10.41,"DO (mg/L)": 15.24, "EC (µS/cm)": 154, "Turbidity (NTU)": 485,  "Water Temp (°C)": 26.18 },
+  { "Ponds_data_collection": "Lamgal Pokhari", "Sample Type": "Reservoir", "Latitude": 27.6754, "Longitude": 85.4365, "Time": "5:50 PM", "RH (%)": 63.2, "Avg Wind Speed": 0.4, "Lux": 3.7, "Air Temp (°C)": 27.5, "pH": 6.41, "DO (mg/L)": 2.92,  "EC (µS/cm)": 316, "Turbidity (NTU)": 45.8, "Water Temp (°C)": 22.04 },
+  { "Ponds_data_collection": "Kamal Pokhari",  "Sample Type": "Lake",      "Latitude": 27.6768, "Longitude": 85.4384, "Time": "6:15 PM", "RH (%)": 65.4, "Avg Wind Speed": 0.4, "Lux": 0.5, "Air Temp (°C)": 22.4, "pH": 9.96, "DO (mg/L)": 12.9,  "EC (µS/cm)": 147, "Turbidity (NTU)": 285,  "Water Temp (°C)": 25.78 }
 ];
 
 /* ------------------------------------------------------------
@@ -66,9 +68,10 @@ function classifyPh(ph) {
 // Add more "if" lines here if you introduce new types later.
 function shapeForType(type) {
   const t = String(type).toLowerCase();
-  if (t.includes("lake"))  return "square";
-  if (t.includes("river")) return "triangle";
-  if (t.includes("pond"))  return "circle";
+  if (t.includes("lake"))      return "square";
+  if (t.includes("river"))     return "triangle";
+  if (t.includes("reservoir")) return "hexagon";
+  if (t.includes("pond"))      return "circle";
   return "diamond"; // fallback for blank / unknown types
 }
 
@@ -87,6 +90,9 @@ function makeMarkerIcon(shape, color) {
       break;
     case "triangle":
       inner = `<polygon points="11,2.5 20,19 2,19" fill="${color}" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>`;
+      break;
+    case "hexagon":
+      inner = `<polygon points="11,2 18.8,6.5 18.8,15.5 11,20 3.2,15.5 3.2,6.5" fill="${color}" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>`;
       break;
     case "diamond":
       inner = `<polygon points="11,2 20,11 11,20 2,11" fill="${color}" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>`;

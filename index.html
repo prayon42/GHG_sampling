@@ -45,7 +45,7 @@
   <!-- ===================== DASHBOARD (summary stats) ===================== -->
   <section class="dashboard" id="dashboard" aria-label="Summary statistics">
     <div class="stat">
-      <span class="stat__label">GHG samples</span>
+      <span class="stat__label">Ponds / Samples</span>
       <span class="stat__value" id="stat-count">—</span>
     </div>
     <div class="stat">
@@ -65,13 +65,46 @@
   <!-- ===================== THE MAP ===================== -->
   <main id="map" role="application" aria-label="Map of pond sampling sites"></main>
 
-  <!-- ===================== LEGEND (pH colour key) ===================== -->
-  <div class="legend" id="legend" aria-label="Marker colour legend">
+  <!-- ===================== LEGEND ===================== -->
+  <!--
+    Two keys here:
+      • COLOUR  explains pH classification
+      • SHAPE   explains the sample type
+    (shapes are drawn grey on purpose — shape = type, colour = pH,
+     so mixing a colour into the shape key would be misleading)
+  -->
+  <div class="legend" id="legend" aria-label="Marker legend">
+    <!-- pH colour key -->
     <h2 class="legend__title">pH classification</h2>
     <ul class="legend__list">
       <li><span class="legend__swatch" style="background: var(--c-acid)"></span> Acidic <small>(&lt; 6.5)</small></li>
       <li><span class="legend__swatch" style="background: var(--c-normal)"></span> Normal <small>(6.5 – 8.5)</small></li>
       <li><span class="legend__swatch" style="background: var(--c-alkaline)"></span> Alkaline <small>(&gt; 8.5)</small></li>
+    </ul>
+
+    <!-- Sample-type shape key -->
+    <h2 class="legend__title" style="margin-top:10px">Sample type</h2>
+    <ul class="legend__list">
+      <li>
+        <svg width="14" height="14" viewBox="0 0 22 22" style="flex:none">
+          <circle cx="11" cy="11" r="8" fill="#5d6b66"/>
+        </svg> Pond
+      </li>
+      <li>
+        <svg width="14" height="14" viewBox="0 0 22 22" style="flex:none">
+          <rect x="3" y="3" width="16" height="16" rx="2" fill="#5d6b66"/>
+        </svg> Lake
+      </li>
+      <li>
+        <svg width="14" height="14" viewBox="0 0 22 22" style="flex:none">
+          <polygon points="11,2.5 20,19 2,19" fill="#5d6b66"/>
+        </svg> River
+      </li>
+      <li>
+        <svg width="14" height="14" viewBox="0 0 22 22" style="flex:none">
+          <polygon points="11,2 18.8,6.5 18.8,15.5 11,20 3.2,15.5 3.2,6.5" fill="#5d6b66"/>
+        </svg> Reservoir
+      </li>
     </ul>
   </div>
 
