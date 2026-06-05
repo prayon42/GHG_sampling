@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- Responsive viewport so the map and panels scale on phones/tablets in the field -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pond Sampling WebGIS — Bhaktapur</title>
+
+  <!-- Leaflet CSS (the mapping library) -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <!-- Google Fonts: Sora (UI) + IBM Plex Mono (instrument-style data readouts) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Our own stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ===================== TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      <span class="topbar__dot"></span>
+      <div>
+        <h1 class="topbar__title">Pond Sampling WebGIS</h1>
+        <p class="topbar__subtitle">Bhaktapur Valley · field water-quality monitor</p>
+      </div>
+    </div>
+    <div class="topbar__status">
+      <!-- Live status indicator updated by script.js -->
+      <span id="status-pill" class="status-pill status-pill--wait">connecting…</span>
+      <span id="last-updated" class="last-updated">—</span>
+    </div>
+  </header>
+
+  <!-- ===================== DASHBOARD (summary stats) ===================== -->
+  <section class="dashboard" id="dashboard" aria-label="Summary statistics">
+    <div class="stat">
+      <span class="stat__label">GHG samples</span>
+      <span class="stat__value" id="stat-count">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">Avg pH</span>
+      <span class="stat__value" id="stat-ph">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">Avg DO <small>(mg/L)</small></span>
+      <span class="stat__value" id="stat-do">—</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">Avg EC <small>(µS/cm)</small></span>
+      <span class="stat__value" id="stat-ec">—</span>
+    </div>
+  </section>
+
+  <!-- ===================== THE MAP ===================== -->
+  <main id="map" role="application" aria-label="Map of pond sampling sites"></main>
+
+  <!-- ===================== LEGEND (pH colour key) ===================== -->
+  <div class="legend" id="legend" aria-label="Marker colour legend">
+    <h2 class="legend__title">pH classification</h2>
+    <ul class="legend__list">
+      <li><span class="legend__swatch" style="background: var(--c-acid)"></span> Acidic <small>(&lt; 6.5)</small></li>
+      <li><span class="legend__swatch" style="background: var(--c-normal)"></span> Normal <small>(6.5 – 8.5)</small></li>
+      <li><span class="legend__swatch" style="background: var(--c-alkaline)"></span> Alkaline <small>(&gt; 8.5)</small></li>
+    </ul>
+  </div>
+
+  <!-- ===================== LIBRARIES ===================== -->
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <!-- PapaParse: robust CSV parser so we can read the Google Sheet CSV reliably -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <!-- Our app logic -->
+  <script src="script.js"></script>
+</body>
+</html>

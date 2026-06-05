@@ -1,0 +1,256 @@
+/* ============================================================
+   Pond Sampling WebGIS — stylesheet
+   Light, high-contrast "field instrument" look that stays
+   readable in sunlight. Teal/forest accents on near-white.
+   ============================================================ */
+
+/* ---------- Design tokens (edit colours here in one place) ---------- */
+:root {
+  --bg:            #eef2f0;   /* page background */
+  --panel:         #ffffff;   /* cards / panels */
+  --ink:           #14201c;   /* primary text */
+  --ink-soft:      #5d6b66;   /* secondary text */
+  --line:          #d8e0dc;   /* hairline borders */
+  --accent:        #0f766e;   /* teal accent (header dot, values) */
+  --accent-dark:   #0b3b35;   /* dark slate-teal header */
+
+  /* pH classification colours (ColorBrewer "Dark2" — colourblind friendly) */
+  --c-acid:     #e8833a;   /* acidic  (< 6.5)   amber/orange */
+  --c-normal:   #1b9e77;   /* normal  (6.5-8.5) teal-green   */
+  --c-alkaline: #7570b3;   /* alkaline (> 8.5)  violet        */
+
+  --shadow: 0 6px 24px rgba(16, 40, 34, 0.14);
+  --radius: 14px;
+}
+
+/* ---------- Reset / base ---------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  width: 100%;
+  font-family: "Sora", sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  overflow: hidden; /* the map handles its own scrolling/panning */
+}
+
+/* Monospace utility for instrument-style numeric readouts */
+.mono { font-family: "IBM Plex Mono", monospace; }
+
+/* ---------- Top bar ---------- */
+.topbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1100;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  background: var(--accent-dark);
+  color: #eafaf5;
+  box-shadow: var(--shadow);
+}
+
+.topbar__brand { display: flex; align-items: center; gap: 12px; }
+
+.topbar__dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--c-normal);
+  box-shadow: 0 0 0 4px rgba(27, 158, 119, 0.25);
+  flex: none;
+}
+
+.topbar__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  line-height: 1.1;
+}
+
+.topbar__subtitle {
+  font-size: 0.72rem;
+  color: #9fc9bf;
+  font-weight: 400;
+}
+
+.topbar__status { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+/* Live status pill — colour swapped by JS via modifier classes */
+.status-pill {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.status-pill--live { background: #1b9e77; color: #03281e; }
+.status-pill--wait { background: #d9b441; color: #2c2300; }
+.status-pill--error{ background: #d96b6b; color: #2c0606; }
+
+.last-updated {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.66rem;
+  color: #9fc9bf;
+}
+
+/* ---------- Dashboard ---------- */
+.dashboard {
+  position: fixed;
+  top: 76px; left: 12px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  max-width: calc(100vw - 24px);
+}
+
+.stat {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 9px 14px;
+  box-shadow: var(--shadow);
+  min-width: 92px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat__label {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.stat__label small { font-weight: 400; text-transform: none; letter-spacing: 0; }
+
+.stat__value {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1;
+}
+
+/* ---------- Map ---------- */
+#map {
+  position: fixed;
+  top: 64px; bottom: 0; left: 0; right: 0;
+  z-index: 1;
+}
+
+/* ---------- Legend ---------- */
+.legend {
+  position: fixed;
+  bottom: 18px; right: 12px;
+  z-index: 1000;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+
+.legend__title {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.legend__list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+.legend__list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+.legend__list small { color: var(--ink-soft); font-weight: 400; }
+
+.legend__swatch {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--line);
+  flex: none;
+}
+
+/* ---------- Popups (override Leaflet defaults) ---------- */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.leaflet-popup-content { margin: 0; }
+
+.popup {
+  font-family: "Sora", sans-serif;
+  min-width: 220px;
+}
+.popup__header {
+  padding: 10px 14px;
+  color: #fff;
+  border-radius: 12px 12px 0 0;
+  /* background colour is set inline by JS to match the pH class */
+}
+.popup__name { font-size: 1rem; font-weight: 700; line-height: 1.2; }
+.popup__time { font-size: 0.72rem; opacity: 0.9; font-family: "IBM Plex Mono", monospace; }
+
+.popup__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  padding: 1px;
+}
+.popup__cell { background: var(--panel); padding: 6px 10px; }
+.popup__cell--full { grid-column: 1 / -1; }
+.popup__k {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--ink-soft);
+}
+.popup__v {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* ---------- Mobile responsiveness ---------- */
+@media (max-width: 640px) {
+  .topbar__subtitle { display: none; }          /* save space on small screens */
+  .topbar__title { font-size: 0.92rem; }
+
+  .dashboard {
+    top: auto;
+    bottom: 12px;
+    left: 8px; right: 8px;
+    max-width: none;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .stat {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 8px;
+    align-items: center;
+    text-align: center;
+  }
+  .stat__value { font-size: 1.05rem; }
+  .stat__label { font-size: 0.52rem; }
+
+  /* Move legend up so it doesn't collide with the bottom dashboard */
+  .legend { bottom: 92px; right: 8px; padding: 9px 11px; }
+  .legend__list li { font-size: 0.72rem; }
+}
