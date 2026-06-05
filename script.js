@@ -31,12 +31,12 @@ const MAP_ZOOM = 14;
    Mixed Sample Types below demo every marker shape.
    ------------------------------------------------------------ */
 const SAMPLE_DATA = [
-  { "Ponds_data_collection": "Rani Pokhari",   "Sample Type": "Pond",      "Latitude": 27.6721, "Longitude": 85.4151, "Time": "3:10 PM", "RH (%)": 70.1, "Avg Wind Speed": 0.7, "Lux": 1.1, "Air Temp (°C)": 26.5, "pH": 7.67, "DO (mg/L)": 7.23,  "EC (µS/cm)": 211, "Turbidity (NTU)": 101,  "Water Temp (°C)": 26.64 },
-  { "Ponds_data_collection": "Sidhha Pokhari", "Sample Type": "Lake",      "Latitude": 27.6717, "Longitude": 85.4201, "Time": "3:40 PM", "RH (%)": 63.5, "Avg Wind Speed": 0.8, "Lux": 1.4, "Air Temp (°C)": 26.6, "pH": 10.92,"DO (mg/L)": 16.45, "EC (µS/cm)": 131, "Turbidity (NTU)": 513,  "Water Temp (°C)": 27.93 },
-  { "Ponds_data_collection": "Bhajya Pokhari", "Sample Type": "Pond",      "Latitude": 27.6707, "Longitude": 85.4211, "Time": "4:15 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 1.0, "Air Temp (°C)": 27.5, "pH": 8.59, "DO (mg/L)": 9.9,   "EC (µS/cm)": 192, "Turbidity (NTU)": 57.8, "Water Temp (°C)": 27.05 },
-  { "Ponds_data_collection": "Na Pokhari",     "Sample Type": "River",     "Latitude": 27.6761, "Longitude": 85.4372, "Time": "4:50 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 3.5, "Air Temp (°C)": 27.4, "pH": 10.41,"DO (mg/L)": 15.24, "EC (µS/cm)": 154, "Turbidity (NTU)": 485,  "Water Temp (°C)": 26.18 },
-  { "Ponds_data_collection": "Lamgal Pokhari", "Sample Type": "Reservoir", "Latitude": 27.6754, "Longitude": 85.4365, "Time": "5:50 PM", "RH (%)": 63.2, "Avg Wind Speed": 0.4, "Lux": 3.7, "Air Temp (°C)": 27.5, "pH": 6.41, "DO (mg/L)": 2.92,  "EC (µS/cm)": 316, "Turbidity (NTU)": 45.8, "Water Temp (°C)": 22.04 },
-  { "Ponds_data_collection": "Kamal Pokhari",  "Sample Type": "Lake",      "Latitude": 27.6768, "Longitude": 85.4384, "Time": "6:15 PM", "RH (%)": 65.4, "Avg Wind Speed": 0.4, "Lux": 0.5, "Air Temp (°C)": 22.4, "pH": 9.96, "DO (mg/L)": 12.9,  "EC (µS/cm)": 147, "Turbidity (NTU)": 285,  "Water Temp (°C)": 25.78 }
+  { "Ponds_data_collection": "Rani Pokhari",   "Sample Type": "Pond",      "Latitude": 27.6721, "Longitude": 85.4151, "Time": "3:10 PM", "RH (%)": 70.1, "Avg Wind Speed": 0.7, "Max Wind Speed": 1.1, "Air Temp (°C)": 26.5, "pH": 7.67, "DO (mg/L)": 7.23,  "EC (µS/cm)": 211, "Turbidity (NTU)": 101,  "Water Temp (°C)": 26.64 },
+  { "Ponds_data_collection": "Sidhha Pokhari", "Sample Type": "Lake",      "Latitude": 27.6717, "Longitude": 85.4201, "Time": "3:40 PM", "RH (%)": 63.5, "Avg Wind Speed": 0.8, "Max Wind Speed": 1.4, "Air Temp (°C)": 26.6, "pH": 10.92,"DO (mg/L)": 16.45, "EC (µS/cm)": 131, "Turbidity (NTU)": 513,  "Water Temp (°C)": 27.93 },
+  { "Ponds_data_collection": "Bhajya Pokhari", "Sample Type": "Pond",      "Latitude": 27.6707, "Longitude": 85.4211, "Time": "4:15 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Max Wind Speed": 1.0, "Air Temp (°C)": 27.5, "pH": 8.59, "DO (mg/L)": 9.9,   "EC (µS/cm)": 192, "Turbidity (NTU)": 57.8, "Water Temp (°C)": 27.05 },
+  { "Ponds_data_collection": "Na Pokhari",     "Sample Type": "River",     "Latitude": 27.6761, "Longitude": 85.4372, "Time": "4:50 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Max Wind Speed": 3.5, "Air Temp (°C)": 27.4, "pH": 10.41,"DO (mg/L)": 15.24, "EC (µS/cm)": 154, "Turbidity (NTU)": 485,  "Water Temp (°C)": 26.18 },
+  { "Ponds_data_collection": "Lamgal Pokhari", "Sample Type": "Reservoir", "Latitude": 27.6754, "Longitude": 85.4365, "Time": "5:50 PM", "RH (%)": 63.2, "Avg Wind Speed": 0.4, "Max Wind Speed": 3.7, "Air Temp (°C)": 27.5, "pH": 6.41, "DO (mg/L)": 2.92,  "EC (µS/cm)": 316, "Turbidity (NTU)": 45.8, "Water Temp (°C)": 22.04 },
+  { "Ponds_data_collection": "Kamal Pokhari",  "Sample Type": "Lake",      "Latitude": 27.6768, "Longitude": 85.4384, "Time": "6:15 PM", "RH (%)": 65.4, "Avg Wind Speed": 0.4, "Max Wind Speed": 0.5, "Air Temp (°C)": 22.4, "pH": 9.96, "DO (mg/L)": 12.9,  "EC (µS/cm)": 147, "Turbidity (NTU)": 285,  "Water Temp (°C)": 25.78 }
 ];
 
 /* ------------------------------------------------------------
@@ -157,8 +157,8 @@ function normaliseRow(row) {
     lng:        num(getField(row, ["Longitude", "Long", "Lng", "Lon"])),
     time:       getField(row, ["Time"]),
     rh:         num(getField(row, ["RH (%)", "RH", "Humidity"])),
-    wind:       num(getField(row, ["Avg Wind Speed", "Wind"])),
-    maxWind:    num(getField(row, ["Max Wind Speed", "Max Windspeed", "Lux"])),
+    avgWind:    num(getField(row, ["Avg Wind Speed", "Average Wind Speed"])),
+    maxWind:    num(getField(row, ["Max Wind Speed", "Max Windspeed", "Maximum Wind Speed"])),
     airTemp:    num(getField(row, ["Air Temp (°C)", "Air Temp", "Air Temperature"])),
     ph:         num(getField(row, ["pH", "PH"])),
     do:         num(getField(row, ["DO (mg/L)", "DO", "Dissolved Oxygen"])),
@@ -200,7 +200,7 @@ function buildPopup(d) {
         ${cell("Water Temp (°C)", fmt(d.waterTemp))}
         ${cell("Air Temp (°C)", fmt(d.airTemp))}
         ${cell("RH (%)", fmt(d.rh))}
-        ${cell("Avg Wind Speed", fmt(d.wind))}
+        ${cell("Avg Wind Speed", fmt(d.avgWind))}
         ${cell("Max Wind Speed", fmt(d.maxWind))}
       </div>
     </div>`;
