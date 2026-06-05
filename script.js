@@ -1,25 +1,18 @@
 /* ============================================================
    Pond Sampling WebGIS — application logic
    ------------------------------------------------------------
-   What this file does:
-     1. Builds a Leaflet map centred on the Bhaktapur pond area.
-     2. Fetches sampling data from a published Google Sheet (CSV).
-     3. Plots one circle-marker per row, coloured by pH.
-     4. Shows a rich popup of field measurements per marker.
-     5. Computes dashboard stats (count, avg pH/DO/EC).
-     6. Auto-refreshes every 10 seconds so new sheet rows appear.
+   Markers carry TWO pieces of information at once:
+     • COLOUR  = pH classification (acidic / normal / alkaline)
+     • SHAPE   = sample type  (pond=circle, lake=square, river=triangle)
 
-   ➜ TO CONNECT YOUR OWN SHEET: edit CSV_URL just below.
-     (See README.md for the exact "Publish to web → CSV" steps.)
+   Auto-refreshes every 10 s so new Google Sheet rows appear.
    ============================================================ */
 
 /* ------------------------------------------------------------
    1. CONFIGURATION  —  EDIT THESE VALUES
    ------------------------------------------------------------ */
 
-// Paste your published Google Sheet CSV link here (ends with output=csv).
-// While this is left as the placeholder below, the app shows the built-in
-// SAMPLE_DATA so you can see everything working immediately.
+// Your published Google Sheet CSV link (kept from your file).
 const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQYDiXd_9fMUQqXxx8GwDhCCWVSy-aER20gaEP7stv5l30g62MOkzs1VRaiXlVx6jkMdV6fCOg4I0_3/pub?gid=0&single=true&output=csv";
 
 // How often to re-fetch the sheet, in milliseconds (10000 = 10 seconds).
@@ -32,17 +25,16 @@ const MAP_ZOOM = 14;
 /* ------------------------------------------------------------
    2. BUILT-IN SAMPLE DATA (fallback)
    ------------------------------------------------------------
-   Used only when CSV_URL is still the placeholder, or if the
-   fetch fails. Lets the map work out-of-the-box on GitHub Pages.
-   Columns mirror your Google Sheet exactly.
+   Used only if the live fetch fails, so the map is never blank.
+   Includes a "Sample Type" column to demo the marker shapes.
    ------------------------------------------------------------ */
 const SAMPLE_DATA = [
-  { "Ponds_data_collection": "Rani Pokhari",   "Latitude": 27.6721, "Longitude": 85.4151, "Time": "3:10 PM", "RH (%)": 70.1, "Avg Wind Speed": 0.7, "Lux": 1.1, "Air Temp (°C)": 26.5, "pH": 7.67, "DO (mg/L)": 7.23,  "EC (µS/cm)": 211, "Turbidity (NTU)": 101,  "Water Temp (°C)": 26.64 },
-  { "Ponds_data_collection": "Sidhha Pokhari", "Latitude": 27.6717, "Longitude": 85.4201, "Time": "3:40 PM", "RH (%)": 63.5, "Avg Wind Speed": 0.8, "Lux": 1.4, "Air Temp (°C)": 26.6, "pH": 10.92,"DO (mg/L)": 16.45, "EC (µS/cm)": 131, "Turbidity (NTU)": 513,  "Water Temp (°C)": 27.93 },
-  { "Ponds_data_collection": "Bhajya Pokhari", "Latitude": 27.6707, "Longitude": 85.4211, "Time": "4:15 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 1.0, "Air Temp (°C)": 27.5, "pH": 8.59, "DO (mg/L)": 9.9,   "EC (µS/cm)": 192, "Turbidity (NTU)": 57.8, "Water Temp (°C)": 27.05 },
-  { "Ponds_data_collection": "Na Pokhari",     "Latitude": 27.6761, "Longitude": 85.4372, "Time": "4:50 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 3.5, "Air Temp (°C)": 27.4, "pH": 10.41,"DO (mg/L)": 15.24, "EC (µS/cm)": 154, "Turbidity (NTU)": 485,  "Water Temp (°C)": 26.18 },
-  { "Ponds_data_collection": "Lamgal Pokhari", "Latitude": 27.6754, "Longitude": 85.4365, "Time": "5:50 PM", "RH (%)": 63.2, "Avg Wind Speed": 0.4, "Lux": 3.7, "Air Temp (°C)": 27.5, "pH": 6.41, "DO (mg/L)": 2.92,  "EC (µS/cm)": 316, "Turbidity (NTU)": 45.8, "Water Temp (°C)": 22.04 },
-  { "Ponds_data_collection": "Kamal Pokhari",  "Latitude": 27.6768, "Longitude": 85.4384, "Time": "6:15 PM", "RH (%)": 65.4, "Avg Wind Speed": 0.4, "Lux": 0.5, "Air Temp (°C)": 22.4, "pH": 9.96, "DO (mg/L)": 12.9,  "EC (µS/cm)": 147, "Turbidity (NTU)": 285,  "Water Temp (°C)": 25.78 }
+  { "Ponds_data_collection": "Rani Pokhari",   "Sample Type": "Pond",  "Latitude": 27.6721, "Longitude": 85.4151, "Time": "3:10 PM", "RH (%)": 70.1, "Avg Wind Speed": 0.7, "Lux": 1.1, "Air Temp (°C)": 26.5, "pH": 7.67, "DO (mg/L)": 7.23,  "EC (µS/cm)": 211, "Turbidity (NTU)": 101,  "Water Temp (°C)": 26.64 },
+  { "Ponds_data_collection": "Sidhha Pokhari", "Sample Type": "Lake",  "Latitude": 27.6717, "Longitude": 85.4201, "Time": "3:40 PM", "RH (%)": 63.5, "Avg Wind Speed": 0.8, "Lux": 1.4, "Air Temp (°C)": 26.6, "pH": 10.92,"DO (mg/L)": 16.45, "EC (µS/cm)": 131, "Turbidity (NTU)": 513,  "Water Temp (°C)": 27.93 },
+  { "Ponds_data_collection": "Bhajya Pokhari", "Sample Type": "Pond",  "Latitude": 27.6707, "Longitude": 85.4211, "Time": "4:15 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 1.0, "Air Temp (°C)": 27.5, "pH": 8.59, "DO (mg/L)": 9.9,   "EC (µS/cm)": 192, "Turbidity (NTU)": 57.8, "Water Temp (°C)": 27.05 },
+  { "Ponds_data_collection": "Na Pokhari",     "Sample Type": "River", "Latitude": 27.6761, "Longitude": 85.4372, "Time": "4:50 PM", "RH (%)": 63.3, "Avg Wind Speed": 0.7, "Lux": 3.5, "Air Temp (°C)": 27.4, "pH": 10.41,"DO (mg/L)": 15.24, "EC (µS/cm)": 154, "Turbidity (NTU)": 485,  "Water Temp (°C)": 26.18 },
+  { "Ponds_data_collection": "Lamgal Pokhari", "Sample Type": "River", "Latitude": 27.6754, "Longitude": 85.4365, "Time": "5:50 PM", "RH (%)": 63.2, "Avg Wind Speed": 0.4, "Lux": 3.7, "Air Temp (°C)": 27.5, "pH": 6.41, "DO (mg/L)": 2.92,  "EC (µS/cm)": 316, "Turbidity (NTU)": 45.8, "Water Temp (°C)": 22.04 },
+  { "Ponds_data_collection": "Kamal Pokhari",  "Sample Type": "Lake",  "Latitude": 27.6768, "Longitude": 85.4384, "Time": "6:15 PM", "RH (%)": 65.4, "Avg Wind Speed": 0.4, "Lux": 0.5, "Air Temp (°C)": 22.4, "pH": 9.96, "DO (mg/L)": 12.9,  "EC (µS/cm)": 147, "Turbidity (NTU)": 285,  "Water Temp (°C)": 25.78 }
 ];
 
 /* ------------------------------------------------------------
@@ -50,17 +42,12 @@ const SAMPLE_DATA = [
    ------------------------------------------------------------ */
 const map = L.map("map", { zoomControl: true }).setView(MAP_CENTER, MAP_ZOOM);
 
-// Base tile layer (OpenStreetMap — free, no API key needed).
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   maxZoom: 19,
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// A layer group that holds all sample markers. We clear & refill it on refresh.
 const markerLayer = L.layerGroup().addTo(map);
-
-// Remember whether we've already auto-fitted the map to the data once,
-// so later refreshes don't keep yanking the user's view around.
 let hasFitBounds = false;
 
 /* ------------------------------------------------------------
@@ -75,20 +62,62 @@ function classifyPh(ph) {
   return            { key: "alkaline", label: "Alkaline", color: cssVar("--c-alkaline") };
 }
 
+// Map a sample type -> a marker shape.
+// Add more "if" lines here if you introduce new types later.
+function shapeForType(type) {
+  const t = String(type).toLowerCase();
+  if (t.includes("lake"))  return "square";
+  if (t.includes("river")) return "triangle";
+  if (t.includes("pond"))  return "circle";
+  return "diamond"; // fallback for blank / unknown types
+}
+
 // Read a CSS custom property value (so JS and CSS share one palette).
 function cssVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
-// Google Sheet headers can vary slightly (extra spaces, missing units, etc.).
-// This finds a row's value by trying several candidate header names, then by
-// loose "contains" matching as a last resort. Returns "" if nothing matches.
+// Build a Leaflet divIcon: an SVG of the chosen shape, filled with the pH colour.
+// SVG keeps shapes crisp at any zoom and lets us recolour per pH.
+function makeMarkerIcon(shape, color) {
+  let inner;
+  switch (shape) {
+    case "square":
+      inner = `<rect x="3" y="3" width="16" height="16" rx="2" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+      break;
+    case "triangle":
+      inner = `<polygon points="11,2.5 20,19 2,19" fill="${color}" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>`;
+      break;
+    case "diamond":
+      inner = `<polygon points="11,2 20,11 11,20 2,11" fill="${color}" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>`;
+      break;
+    case "circle":
+    default:
+      inner = `<circle cx="11" cy="11" r="8" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+      break;
+  }
+
+  const svg =
+    `<svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg"
+          style="filter: drop-shadow(0 1px 1.5px rgba(0,0,0,.45))">${inner}</svg>`;
+
+  // Custom className stops Leaflet drawing its default white box around divIcons.
+  // iconAnchor centres the shape exactly on the coordinate.
+  return L.divIcon({
+    html: svg,
+    className: "pond-marker",
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+    popupAnchor: [0, -11],
+    tooltipAnchor: [0, -10]
+  });
+}
+
+// Find a row's value by trying several candidate header names, then loose match.
 function getField(row, candidates) {
-  // 1) exact match
   for (const c of candidates) {
     if (row[c] !== undefined && row[c] !== "") return row[c];
   }
-  // 2) loose match: normalise (lowercase, strip non-alphanumerics) and compare
   const norm = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, "");
   const wanted = candidates.map(norm);
   for (const key of Object.keys(row)) {
@@ -116,19 +145,20 @@ function fmt(v, digits = 2) {
    ------------------------------------------------------------ */
 function normaliseRow(row) {
   return {
-    name:      getField(row, ["Ponds_data_collection", "Pond", "Pond Name", "Name"]) || "Unnamed pond",
-    lat:       num(getField(row, ["Latitude", "Lat"])),
-    lng:       num(getField(row, ["Longitude", "Long", "Lng", "Lon"])),
-    time:      getField(row, ["Time"]),
-    rh:        num(getField(row, ["RH (%)", "RH", "Humidity"])),
-    wind:      num(getField(row, ["Avg Wind Speed", "Wind"])),
-    lux:       num(getField(row, ["Lux"])),
-    airTemp:   num(getField(row, ["Air Temp (°C)", "Air Temp", "Air Temperature"])),
-    ph:        num(getField(row, ["pH", "PH"])),
-    do:        num(getField(row, ["DO (mg/L)", "DO", "Dissolved Oxygen"])),
-    ec:        num(getField(row, ["EC (µS/cm)", "EC", "Conductivity"])),
-    turbidity: num(getField(row, ["Turbidity (NTU)", "Turbidity"])),
-    waterTemp: num(getField(row, ["Water Temp (°C)", "Water Temp", "Water Temperature"]))
+    name:       getField(row, ["Ponds_data_collection", "Pond", "Pond Name", "Name"]) || "Unnamed pond",
+    sampleType: getField(row, ["Sample Type", "Sample_Type", "Type"]) || "—",
+    lat:        num(getField(row, ["Latitude", "Lat"])),
+    lng:        num(getField(row, ["Longitude", "Long", "Lng", "Lon"])),
+    time:       getField(row, ["Time"]),
+    rh:         num(getField(row, ["RH (%)", "RH", "Humidity"])),
+    wind:       num(getField(row, ["Avg Wind Speed", "Wind"])),
+    lux:        num(getField(row, ["Lux"])),
+    airTemp:    num(getField(row, ["Air Temp (°C)", "Air Temp", "Air Temperature"])),
+    ph:         num(getField(row, ["pH", "PH"])),
+    do:         num(getField(row, ["DO (mg/L)", "DO", "Dissolved Oxygen"])),
+    ec:         num(getField(row, ["EC (µS/cm)", "EC", "Conductivity"])),
+    turbidity:  num(getField(row, ["Turbidity (NTU)", "Turbidity"])),
+    waterTemp:  num(getField(row, ["Water Temp (°C)", "Water Temp", "Water Temperature"]))
   };
 }
 
@@ -138,7 +168,6 @@ function normaliseRow(row) {
 function buildPopup(d) {
   const cls = classifyPh(d.ph);
 
-  // Small helper to render one key/value cell.
   const cell = (label, value, full = false) =>
     `<div class="popup__cell${full ? " popup__cell--full" : ""}">
        <div class="popup__k">${label}</div>
@@ -156,6 +185,7 @@ function buildPopup(d) {
         <div class="popup__time">${d.time || "no time"} · ${cls.label} pH</div>
       </div>
       <div class="popup__grid">
+        ${cell("Sample type", d.sampleType, true)}
         ${cell("Latitude / Longitude", coords, true)}
         ${cell("pH", fmt(d.ph))}
         ${cell("DO (mg/L)", fmt(d.do))}
@@ -187,19 +217,16 @@ function render(rows) {
     // Skip rows without valid coordinates (can't map them).
     if (d.lat === null || d.lng === null) return;
 
-    const cls = classifyPh(d.ph);
+    const cls = classifyPh(d.ph);               // -> colour (pH)
+    const shape = shapeForType(d.sampleType);   // -> shape (type)
 
-    // Circle marker coloured by pH classification.
-    const marker = L.circleMarker([d.lat, d.lng], {
-      radius: 9,
-      fillColor: cls.color,
-      color: "#ffffff",   // white outline
-      weight: 2,
-      fillOpacity: 0.92
+    // A marker whose icon encodes BOTH pieces of information.
+    const marker = L.marker([d.lat, d.lng], {
+      icon: makeMarkerIcon(shape, cls.color)
     });
 
     marker.bindPopup(buildPopup(d), { closeButton: true });
-    marker.bindTooltip(d.name, { direction: "top", offset: [0, -6] });
+    marker.bindTooltip(d.name, { direction: "top" });
     marker.addTo(markerLayer);
 
     points.push([d.lat, d.lng]);
@@ -246,7 +273,6 @@ function usingSampleData() {
 }
 
 function loadData() {
-  // If no real URL is set yet, just show the sample data.
   if (usingSampleData()) {
     render(SAMPLE_DATA);
     setStatus("wait", "sample data");
@@ -257,7 +283,6 @@ function loadData() {
   // Cache-bust so Google/your browser don't serve a stale CSV on refresh.
   const url = CSV_URL + (CSV_URL.includes("?") ? "&" : "?") + "_t=" + Date.now();
 
-  // PapaParse downloads + parses the CSV for us (header row -> object keys).
   Papa.parse(url, {
     download: true,
     header: true,
